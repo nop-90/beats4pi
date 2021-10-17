@@ -1,24 +1,24 @@
 #!/bin/bash
 echo Target version: $BEATS_VERSION
 
-go get github.com/magefile/mage
+GOARCH=amd64 go install github.com/magefile/mage@v1.11.0
 
 BRANCH=$(echo $BEATS_VERSION | awk -F \. {'print $1 "." $2'})
 echo Target branch: $BRANCH
 
-if [ ! -d "$GOPATH/src/github.com/elastic/beats" ]; then go get -v github.com/elastic/beats; fi
+if [ ! -d "$GOPATH/src/github.com/elastic/beats" ]; then GOARCH=arm go install github.com/elastic/beats/v7@v$BEATS_VERSION; fi
 
-cd $GOPATH/src/github.com/elastic/beats
-git checkout $BRANCH
+cd $GOPATH/pkg/mod/github.com/elastic/beats/v7@v$BEATS_VERSION
 
 IFS=","
 BEATS_ARRAY=($BEATS)
 
 for BEAT in "${BEATS_ARRAY[@]}"
 do
+    export PATH=$GOPATH/bin:$PATH
     # build
-    cd $GOPATH/src/github.com/elastic/beats/$BEAT
-    make
+    cd $GOPATH/pkg/mod/github.com/elastic/beats/v7@v$BEATS_VERSION/$BEAT
+    make -j7
     cp $BEAT /build
 
     # package
