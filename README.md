@@ -11,17 +11,26 @@ The image has a couple of ENV vars that can be used for customizing what and how
   - `BEATS=filebeat,metricbeat` - comma-separated list of beats to compile
   - `BEATS_VERSION=6.1.1` - version to compile
 
+## Building images
+    ARMv6 :
+    docker build -t beats4pi:armv6 -f Dockerfile-armv6 .
+
+    ARMv7 :
+    docker build -t beats4pi:armv7 -f Dockerfile-armv7 .
+
+
 ## Building elastic beats
 
-This command will output the build result in the current folder:
+This command will output the build result in the `go_build` folder:
 
-    docker run -v $(pwd):/build -e BEATS_VERSION=6.0.1 andig/beats4pi
-    
-## Other
+    ARMv6 (Rasp Zero) :
+    docker run -it -v $(pwd)/go_src:/go -v $(pwd)/go_build:/build --rm beats4pi:armv6
 
-To test the build script without re-downloading elastic/beats you can clone it once and then map the cloned folder into the images' `GOPATH`:
+    ARMv7 (Rasp 3) :
+    docker run -it -v $(pwd)/go_src:/go -v $(pwd)/go_build:/build --rm beats4pi:armv7
 
-    git clone https://github.com/elastic/beats
-    docker run -v $(pwd)/beats:/go/src/github.com/elastic/beats andig/beats4pi
-
-See https://gist.github.com/andig/650915e02b18cfe38de6516686977bca for an approach how to manually build beats with the various configurations required natively on a RaspberryPi 3.
+Forked from andig/beats4pi
+Adaptations :
+    - go get becomes go install
+    - No need to clone beats before building
+    - Add another dockerfile for armv6 (can be useful to maintain two images with a tag for each architecture)
